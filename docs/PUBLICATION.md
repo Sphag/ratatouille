@@ -41,6 +41,8 @@ python3 -B -m unittest discover -s tools/publication -p 'test_*.py' -v
 
 Встроенный коннектор, отдельный официальный GitHub MCP и GitHub CLI используют разные подключения. Коннектор продолжает возвращать `403 Resource not accessible by integration` при записи; это не проверяет PAT отдельного MCP. Сохранённая авторизация `gh` успешно использована для публикации и создания Issues.
 
+По решению владельца от 8 октября дальнейшая работа с GitHub пока выполняется через `gh`; диагностика удалённого GitHub MCP отложена. MCP-конфигурация и глобальные настройки Git не меняются. GraphQL-запрос через `gh api graphql` подтвердил, что GitHub распознал оба шаблона — «Задача» и «Ошибка» — с правильными названиями, описаниями и разделами. Эта проверка дополняет сверку файлов; визуальный просмотр выбора шаблонов владельцем остаётся в списке завершения T03.
+
 Дополнительная проверка 8 октября установила, что сохранённая авторизация `gh` использует OAuth-токен. Передача этого токена только дочернему процессу позволила проверить адрес MCP без вывода значения и изменения настроек: сервер GitHub MCP вернул `HTTP 403: forbidden: access denied`. Это отдельный отказ для OAuth-токена, а не результат проверки fine-grained PAT владельца. Context7 в той же штатной удалённой проверке прошёл; отчёт сохранён только в исключённом кэше. Причина отсутствия инструментов отдельного MCP в текущем чате пока не установлена.
 
 Затем владелец выполнил `bash tools/mcp/check.sh remote` в своём WSL-терминале с заданным fine-grained PAT. Его отчёт также подтвердил `context7: PASS` и `github: FAIL HTTP 403: forbidden: access denied`. Проверка обычного API с тем же PAT через `GH_TOKEN="$GITHUB_MCP_TOKEN" gh api user --jq .login` вернула `Sphag`: токен работает для GitHub API. Отсутствие переменной в окружении команд помощника не объясняет этот отдельный отказ.
@@ -67,7 +69,7 @@ codex
 git init
 git symbolic-ref HEAD refs/heads/main
 git remote add origin https://github.com/Sphag/ratatouille.git
-git fetch origin main
+git -c credential.helper= -c 'credential.helper=!gh auth git-credential' fetch origin main
 git reset --mixed origin/main
 git branch --set-upstream-to=origin/main main
 git status --short
