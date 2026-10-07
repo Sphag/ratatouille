@@ -6,7 +6,7 @@ This workspace contains specification and publication-preparation documents, Mar
 
 For the first implementation, agree on the layout: suggested directories are `src/`, `tests/`, and `assets/`. Document the actual structure in dedicated developer documentation. Keep `README.md` focused on the project's purpose, features, and setup rather than directory inventories or icon production details.
 
-T03 is separately agreed for the public repository `Sphag/ratatouille` with MIT. `tools/publication/` prepares only the files listed in `docs/PUBLICATION_MANIFEST.md`, an isolated Git snapshot, and T00–T15 Issue bodies; generated artifacts remain in its ignored `.cache/`. Instructions are in `docs/PUBLICATION.md`. Thirty files and sixteen Issues have been published; T00–T02 are closed. T03 remains open until the root working directory is linked and the Issue template interface is verified. Creating Issues does not authorize application implementation.
+T03 is complete for the public repository `Sphag/ratatouille` with MIT. `tools/publication/` prepares only the files listed in `docs/PUBLICATION_MANIFEST.md`, an isolated Git snapshot, and T00–T15 Issue bodies; generated artifacts remain in its ignored `.cache/`. Instructions are in `docs/PUBLICATION.md`. Thirty files and sixteen Issues have been published; T00–T03 are closed. The root working directory is linked to `origin/main`, private files are excluded, and the owner verified the Issue template interface. GitHub operations currently use `gh`; remote GitHub MCP diagnostics are deferred. Creating Issues does not authorize application implementation.
 
 ## Build, Test, and Development Commands
 
@@ -24,7 +24,7 @@ No testing framework or coverage threshold exists. When adding executable code, 
 
 ## Commit & Pull Request Guidelines
 
-Git history is available in the published repository; the root working directory is not yet linked. Use concise, imperative commit subjects, such as `Add initial project configuration`, and keep commits focused.
+Git history is available in the published repository and the linked root working directory. Its `.git/` remains read-only in the managed session; commits can be prepared in the isolated publication repository. Use concise, imperative commit subjects, such as `Add initial project configuration`, and keep commits focused.
 
 Pull requests should explain the purpose, summarize changes, and report verification results. Link relevant issues; include screenshots for interface changes. Identify checks that could not be run.
 

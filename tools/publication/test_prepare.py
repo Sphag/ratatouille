@@ -49,15 +49,21 @@ class PublicationChecks(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "docs").mkdir()
-            body = "\n".join("### T{:02d} — Task\n\n**Зависимости:** T04–T06.\n\n**Готово, когда:** checked.\n".format(n)
-                             for n in range(16))
-            (root / "docs/BACKLOG.md").write_text(body, encoding="utf-8")
-            with patch.object(prepare, "ROOT", root):
-                issues = prepare.issue_specs()
-            self.assertEqual(issues[7]["dependencies"], ["T04", "T05", "T06"])
-            self.assertEqual([issue["state"] for issue in issues[:4]], ["closed", "closed", "closed", "open"])
-            self.assertIn("- [ ]", issues[4]["body"])
-            self.assertIn("- [x]", issues[3]["body"])
+            for completed_count in (3, 4):
+                with self.subTest(completed_count=completed_count):
+                    body = "\n".join(
+                        "### T{:02d} — Task\n\n**Зависимости:** T04–T06.\n\n"
+                        "**Готово, когда:** checked.\n\n**Статус:** {}.\n".format(
+                            n, "завершена" if n < completed_count else "выполняется")
+                        for n in range(16))
+                    (root / "docs/BACKLOG.md").write_text(body, encoding="utf-8")
+                    with patch.object(prepare, "ROOT", root):
+                        issues = prepare.issue_specs()
+                    self.assertEqual(issues[7]["dependencies"], ["T04", "T05", "T06"])
+                    self.assertEqual([issue["state"] for issue in issues],
+                                     ["closed"] * completed_count + ["open"] * (16 - completed_count))
+                    self.assertIn("- [ ]", issues[4]["body"])
+                    self.assertIn("- [x]", issues[3]["body"])
 
 
 if __name__ == "__main__":

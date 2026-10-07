@@ -82,6 +82,7 @@ def issue_specs():
     for index in range(1, len(sections), 3):
         task, title, body = sections[index:index + 3]
         body = re.split(r"(?m)^## ", body)[0].strip()
+        completed = bool(re.search(r"(?m)^\*\*Статус:\*\* завершена\b", body))
         dependency_line = re.search(r"\*\*Зависимости:\*\* ([^\n]+)", body)
         if not dependency_line:
             body = "**Зависимости:** нет.\n\n" + body
@@ -98,14 +99,14 @@ def issue_specs():
         body += "\n\n## Согласование начала\n\n- [{}] Владелец отдельно согласовал эту задачу.\n".format("x" if agreed else " ")
         body += "\nСоздание Issue не разрешает выполнение следующих задач. Отложенные решения требуют ответа владельца.\n"
         body += "\n## Проверка\n\n"
-        if task in {"T00", "T01", "T02"}:
+        if completed:
             body += "Фактические результаты приведены в статусе выше и в документации соответствующей задачи.\n"
         else:
             body += "Проверить каждый критерий готовности; записать фактический результат и невыполненные проверки перед закрытием Issue. Проверки приложения пока не выполнены.\n"
         body += "\n[Источник: бэклог]({}docs/BACKLOG.md) · [Требования]({}docs/PROJECT_BRIEF.md)\n".format(BASE_URL, BASE_URL)
         issues.append({"task": task, "title": task + " — " + title, "body": body,
                        "dependencies": list(dict.fromkeys(dependencies)),
-                       "state": "closed" if task in {"T00", "T01", "T02"} else "open"})
+                       "state": "closed" if completed else "open"})
     require([issue["task"] for issue in issues] == ["T{:02d}".format(n) for n in range(16)], "Expected T00–T15")
     return issues
 
