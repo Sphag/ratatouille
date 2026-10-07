@@ -1,0 +1,16 @@
+{
+  "name": "ratatouille-development-mcp",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Project-scoped MCP tooling; not the application",
+  "engines": { "node": "24.21.0" },
+  "dependencies": {
+    "@bytebase/dbhub": "1.4.0",
+    "@playwright/mcp": "0.0.83",
+    "playwright-browser": "npm:playwright@1.58.2"
+  },
+  "scripts": {
+    "check": "node check.mjs",
+    "check:remote": "node check.mjs remote"
+  }
+}

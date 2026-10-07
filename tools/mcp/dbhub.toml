@@ -1,0 +1,13 @@
+[[sources]]
+id = "ratatouille_test"
+dsn = "${RATATOUILLE_SQLITE_DSN}"
+
+[[tools]]
+name = "execute_sql"
+source = "ratatouille_test"
+readonly = true
+max_rows = 1000
+
+[[tools]]
+name = "search_objects"
+source = "ratatouille_test"

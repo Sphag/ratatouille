@@ -1,0 +1,56 @@
+# Личные анкеты и случайно добавленные личные материалы.
+# Исходный личный отчёт хранится вне проекта.
+/docs/QUESTIONNAIRE.md
+/docs/FOLLOW_UP.md
+private/
+.aws/
+.agents/
+.codex/
+
+# Локальная конфигурация; публичные примеры содержат только заглушки.
+.env
+.env.*
+!.env.example
+
+# SQLite и служебные файлы; обезличенные JSON/CSV-данные не исключаются.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Виртуальные окружения и кэши Python / инструментов разработки.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Артефакты сборки и локальные журналы.
+build/
+dist/
+*.egg-info/
+node_modules/
+/tools/mcp/.cache/
+logs/
+*.log
+
+# Локальные файлы операционной системы.
+.DS_Store
+Thumbs.db

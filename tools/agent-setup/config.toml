@@ -1,0 +1,29 @@
+# Фрагмент для <корень проекта>/.codex/config.toml.
+# Перед активацией заменить оба cwd абсолютным путём к корню проекта.
+# Значение "." подходит только при запуске клиента из корня; не устанавливать глобально.
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+
+[mcp_servers.playwright]
+command = "bash"
+args = ["tools/mcp/run.sh", "playwright"]
+cwd = "."
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_MCP_TOKEN"
+http_headers = { "X-MCP-Toolsets" = "context,repos,issues,pull_requests,actions" }
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+
+[mcp_servers.sqlite]
+command = "bash"
+args = ["tools/mcp/run.sh", "sqlite"]
+cwd = "."
+env_vars = ["RATATOUILLE_SQLITE_DSN"]
+startup_timeout_sec = 30
+tool_timeout_sec = 60
