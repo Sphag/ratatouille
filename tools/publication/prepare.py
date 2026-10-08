@@ -37,7 +37,8 @@ def public_path(path):
     candidate = PurePosixPath(path)
     require(not candidate.is_absolute() and ".." not in candidate.parts, "Unsafe path: " + path)
     require(not FORBIDDEN.intersection(candidate.parts), "Excluded path: " + path)
-    require(path not in PRIVATE_FILES and not candidate.name.startswith(".env"), "Private path: " + path)
+    example = path == ".env.example"
+    require(path not in PRIVATE_FILES and (example or not candidate.name.startswith(".env")), "Private path: " + path)
     target = ROOT / path
     require(target.is_file(), "Missing file: " + path)
     require(target.resolve() == target.absolute(), "Symlink path: " + path)
@@ -95,9 +96,10 @@ def issue_specs():
             match.group(0).split("](", 1)[0][1:],
             match.group(1) if "://" in match.group(1) else BASE_URL + "docs/" + match.group(1)
         ), body)
-        agreed = task in {"T00", "T01", "T02", "T03"}
+        agreed = completed or task in {"T00", "T01", "T02", "T03"} or bool(
+            re.search(r"(?m)^\*\*Согласование:\*\* согласована\b", body))
         body += "\n\n## Согласование начала\n\n- [{}] Владелец отдельно согласовал эту задачу.\n".format("x" if agreed else " ")
-        body += "\nСоздание Issue не разрешает выполнение следующих задач. Отложенные решения требуют ответа владельца.\n"
+        body += "\nСоздание Issue не разрешает выполнение следующих задач. Решения принимаются в пределах согласованной задачи и делегированных полномочий.\n"
         body += "\n## Проверка\n\n"
         if completed:
             body += "Фактические результаты приведены в статусе выше и в документации соответствующей задачи.\n"
@@ -143,7 +145,8 @@ def prepare():
     git(snapshot, "symbolic-ref", "HEAD", "refs/heads/main")
     excluded = ["docs/QUESTIONNAIRE.md", "docs/FOLLOW_UP.md", ".env", ".aws/test", ".agents/test",
                 ".codex/test", "private/test", "local.sqlite", "tools/mcp/.cache/test",
-                "tools/publication/.cache/test", "tools/mcp/node_modules/test"]
+                "tools/publication/.cache/test", "tools/mcp/node_modules/test", ".env.local",
+                ".venv/test", "frontend/node_modules/test", "frontend/dist/test", "tools/dev/.cache/test"]
     for path in excluded:
         require(git(snapshot, "check-ignore", "--", path) == path, "Not ignored: " + path)
     git(snapshot, "add", "--", *paths)
