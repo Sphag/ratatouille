@@ -9,6 +9,7 @@ dependencies = [
   "aiogram>=3.31,<4",
   "alembic>=1.15,<2",
   "fastapi>=0.115,<1",
+  "pydantic>=2.13,<3",
   "sqlalchemy>=2.0,<2.1",
   "uvicorn>=0.30,<1",
 ]

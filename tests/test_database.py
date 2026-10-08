@@ -54,7 +54,7 @@ def test_engine_construction_does_not_create_database_and_migration_is_repeatabl
             assert second.exec_driver_sql("PRAGMA recursive_triggers").scalar() == 1
             assert first.exec_driver_sql("PRAGMA foreign_key_check").all() == []
             assert (
-                first.exec_driver_sql("SELECT version_num FROM alembic_version").scalar() == "0001"
+                first.exec_driver_sql("SELECT version_num FROM alembic_version").scalar() == "0002"
             )
     finally:
         engine.dispose()
@@ -145,7 +145,11 @@ def test_importing_web_and_storage_does_not_create_database(tmp_path: Path) -> N
     environment["RATATOUILLE_DB_PATH"] = str(path)
     environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
     subprocess.run(
-        [sys.executable, "-c", "import ratatouille.app; import ratatouille.storage"],
+        [
+            sys.executable,
+            "-c",
+            "import ratatouille.app; import ratatouille.storage; import ratatouille.local_app",
+        ],
         cwd=tmp_path,
         env=environment,
         check=True,
@@ -153,3 +157,49 @@ def test_importing_web_and_storage_does_not_create_database(tmp_path: Path) -> N
         timeout=15,
     )
     assert not path.exists()
+
+
+def test_starter_migration_preserves_existing_recipe_and_confirmed_plan(tmp_path: Path) -> None:
+    from ratatouille.domain import Slot
+
+    path = tmp_path / "upgrade.sqlite3"
+    engine = make_engine(path)
+    config = Config("alembic.ini")
+    try:
+        with engine.begin() as connection:
+            config.attributes["connection"] = connection
+            command.upgrade(config, "0001")
+        store = Store(engine)
+        owner = store.create_user()
+        ingredient = store.create_ingredient(owner, "Продукт")
+        recipe = store.create_recipe(
+            owner,
+            RecipeInput(
+                "Рецепт",
+                "",
+                1,
+                Nutrition(calories=Decimal("0.00000001")),
+                (IngredientInput(ingredient, Decimal("0.5"), Unit.PIECE),),
+            ),
+        )
+        draft = store.create_draft(owner, start_date=date(2026, 10, 12))
+        draft = store.set_entry(
+            owner,
+            draft.id,
+            day=0,
+            slot=Slot.DINNER,
+            version_id=recipe.version_id,
+            expected_number=draft.number,
+        )
+        confirmed = store.confirm(owner, draft.id, expected_number=draft.number)
+        before = store.calculate(owner, confirmed.id)
+        migrate(path)
+        assert store.get_confirmed(owner, confirmed.plan_id) == confirmed
+        assert store.calculate(owner, confirmed.id) == before
+        with engine.begin() as connection:
+            config.attributes["connection"] = connection
+            command.downgrade(config, "0001")
+        assert store.calculate(owner, confirmed.id) == before
+        assert "starter_imports" not in inspect(engine).get_table_names()
+    finally:
+        engine.dispose()

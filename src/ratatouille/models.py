@@ -92,6 +92,13 @@ class Ingredient(Owned, Base):
     )
 
 
+class StarterImport(Owned, Base):
+    __tablename__ = "starter_imports"
+    library_id: Mapped[str]
+    digest: Mapped[str]
+    __table_args__ = (UniqueConstraint("owner_id", "library_id"),)
+
+
 class Recipe(Owned, Base):
     __tablename__ = "recipes"
     current_version_id: Mapped[str | None]
