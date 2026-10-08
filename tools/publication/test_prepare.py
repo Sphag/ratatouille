@@ -1,4 +1,4 @@
-"""Failure cases for publication tooling; no application test framework is selected."""
+"""Failure cases for the explicit public-file boundary and Issue preparation."""
 
 import importlib.util
 from pathlib import Path
@@ -15,9 +15,21 @@ SPEC.loader.exec_module(prepare)
 class PublicationChecks(unittest.TestCase):
     def test_private_and_traversal_paths_are_rejected_before_reading(self):
         for path in ["../outside.md", "/tmp/outside.md", "docs/QUESTIONNAIRE.md",
-                     "docs/FOLLOW_UP.md", ".codex/config.toml", ".agents/SKILL.md", ".env"]:
+                     "docs/FOLLOW_UP.md", ".codex/config.toml", ".agents/SKILL.md", ".env",
+                     ".env.local", ".env.example.local", "nested/.env.example"]:
             with self.subTest(path=path), self.assertRaises(ValueError):
                 prepare.public_path(path)
+
+    def test_root_environment_example_is_allowed_and_scanned_for_secrets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".env.example").write_text("BOT_TOKEN=\n", encoding="utf-8")
+            with patch.object(prepare, "ROOT", root):
+                self.assertEqual(prepare.public_path(".env.example"), root / ".env.example")
+            prepare.check_text(".env.example", b"BOT_TOKEN=\n", {".env.example"})
+            with self.assertRaises(ValueError):
+                prepare.check_text(".env.example", ("BOT_TOKEN=ghp_" + "A" * 36).encode(),
+                                   {".env.example"})
 
     def test_symlink_to_an_outside_file_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -49,12 +61,14 @@ class PublicationChecks(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "docs").mkdir()
-            for completed_count in (3, 4):
+            for completed_count in (3, 4, 5):
                 with self.subTest(completed_count=completed_count):
                     body = "\n".join(
                         "### T{:02d} — Task\n\n**Зависимости:** T04–T06.\n\n"
-                        "**Готово, когда:** checked.\n\n**Статус:** {}.\n".format(
-                            n, "завершена" if n < completed_count else "выполняется")
+                        "**Готово, когда:** checked.\n\n{}**Статус:** {}.\n".format(
+                            n, ("**Согласование:** согласована.\n\n" if completed_count == 4
+                                else "**Согласование:** не согласована.\n\n") if n == 4 else "",
+                            "завершена" if n < completed_count else "выполняется")
                         for n in range(16))
                     (root / "docs/BACKLOG.md").write_text(body, encoding="utf-8")
                     with patch.object(prepare, "ROOT", root):
@@ -62,7 +76,8 @@ class PublicationChecks(unittest.TestCase):
                     self.assertEqual(issues[7]["dependencies"], ["T04", "T05", "T06"])
                     self.assertEqual([issue["state"] for issue in issues],
                                      ["closed"] * completed_count + ["open"] * (16 - completed_count))
-                    self.assertIn("- [ ]", issues[4]["body"])
+                    self.assertIn("- [{}]".format("x" if completed_count >= 4 else " "),
+                                  issues[4]["body"])
                     self.assertIn("- [x]", issues[3]["body"])
 
 

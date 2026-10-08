@@ -1,0 +1,55 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #283c31;
+  background: #faf7ef;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 280px;
+  min-height: 100dvh;
+}
+
+.welcome {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: clamp(36px, 12vh, 112px) 24px 40px;
+  text-align: center;
+}
+
+.welcome__icon {
+  width: 144px;
+  height: 144px;
+  border-radius: 50%;
+}
+
+.welcome__eyebrow {
+  margin-top: 28px;
+  color: #657368;
+  font-size: 16px;
+}
+
+h1 {
+  margin: 12px 0 20px;
+  font-size: clamp(36px, 8vw, 48px);
+  letter-spacing: -0.04em;
+}
+
+.welcome__description {
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.welcome__status {
+  margin-top: 28px;
+  color: #657368;
+  font-size: 16px;
+  line-height: 1.5;
+}
