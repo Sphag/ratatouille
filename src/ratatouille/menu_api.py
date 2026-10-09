@@ -17,11 +17,21 @@ from ratatouille.menus import (
     stored_nutrition,
     view,
 )
+from ratatouille.proposals import ApplyProposal, Proposal, Proposals
 from ratatouille.recipe_api import local_request
 
 
 def install_menu_api(application: FastAPI, menus: Menus, owner: str) -> None:
     router = APIRouter(prefix="/api/menu", dependencies=[Depends(local_request)])
+    proposals = Proposals(menus)
+
+    @router.post("/revisions/{identifier}/proposal")
+    def proposal(identifier: str, data: Expected) -> Proposal:
+        return proposals.preview(owner, identifier, data)
+
+    @router.put("/revisions/{identifier}/proposal")
+    def apply_proposal(identifier: str, data: ApplyProposal) -> MenuView:
+        return proposals.apply(owner, identifier, data)
 
     @router.get("/defaults")
     def defaults() -> dict[str, str]:
