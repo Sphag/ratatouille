@@ -25,6 +25,7 @@ private/
 *.sqlite3-journal
 *.sqlite3-wal
 *.sqlite3-shm
+*.local-owner.json
 
 # Виртуальные окружения и кэши Python / инструментов разработки.
 .venv/
