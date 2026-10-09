@@ -317,3 +317,33 @@ class Reminder(Owned, Base):
         CheckConstraint("weekday >= 0 AND weekday <= 6", name="weekday"),
         CheckConstraint("timezone = 'Europe/Moscow'", name="timezone"),
     )
+
+
+class Delivery(Owned, Base):
+    __tablename__ = "reminder_deliveries"
+    event_key: Mapped[str] = mapped_column(unique=True)
+    plan_id: Mapped[str]
+    revision_id: Mapped[str]
+    due_at: Mapped[int]
+    next_at: Mapped[int]
+    attempts: Mapped[int] = mapped_column(default=0)
+    state: Mapped[str]
+    text: Mapped[str] = mapped_column(Text)
+    __table_args__ = (
+        ForeignKeyConstraint(["plan_id", "owner_id"], ["plans.id", "plans.owner_id"]),
+        ForeignKeyConstraint(
+            ["revision_id", "plan_id", "owner_id"],
+            ["plan_revisions.id", "plan_revisions.plan_id", "plan_revisions.owner_id"],
+        ),
+        CheckConstraint(
+            "state IN ('pending','sending','sent','failed','uncertain','cancelled')",
+            name="delivery_state",
+        ),
+        CheckConstraint("attempts >= 0", name="attempts"),
+    )
+
+
+class ErrorNotice(Owned, Base):
+    __tablename__ = "error_notices"
+    window: Mapped[int]
+    __table_args__ = (UniqueConstraint("owner_id", "window"),)
