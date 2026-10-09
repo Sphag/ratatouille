@@ -7,11 +7,15 @@ export function MenuProposal({
   busy,
   onApply,
   onDiscard,
+  note,
+  admissionNote,
 }: {
   proposal: Proposal;
   busy: boolean;
   onApply: () => Promise<void>;
   onDiscard: () => void;
+  note?: string;
+  admissionNote?: string;
 }) {
   const [week, setWeek] = useState(0);
   const menu = proposal.menu;
@@ -24,8 +28,8 @@ export function MenuProposal({
       <h1>Предложение меню</h1>
       <p>{rangeLabel(menu.start_date, menu.days)}</p>
       <p className="notice">
-        Черновик пока не изменён. Применение заменит блюда всех недель. Подтверждённый план
-        сохранится до отдельного подтверждения меню.
+        {note ??
+          'Черновик пока не изменён. Применение заменит блюда всех недель. Подтверждённый план сохранится до отдельного подтверждения меню.'}
       </p>
       <p>
         {menu.mode === 'ab'
@@ -33,8 +37,8 @@ export function MenuProposal({
           : `Лимит: ${menu.repeat_limit} появления блюда за неделю по всем слотам.`}
       </p>
       <p className="hint">
-        Использованы только активные рецепты с вашим явным допуском. Каждое блюдо — одна порция.
-        Проверьте распределение по приёмам пищи.
+        {admissionNote ??
+          'Использованы только активные рецепты с вашим явным допуском. Каждое блюдо — одна порция. Проверьте распределение по приёмам пищи.'}
       </p>
       <nav className="tabs" aria-label="Недели предложения">
         {Array.from({ length: menu.days / 7 }, (_, i) => (

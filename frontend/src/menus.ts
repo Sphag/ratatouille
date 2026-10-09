@@ -1,4 +1,4 @@
-import type { RecipeFields } from './recipes';
+import type { RecipeFields, Unit } from './recipes';
 
 export type Nutrition = RecipeFields['nutrition'];
 export type Mode = 'ab' | 'limited';
@@ -24,6 +24,7 @@ export interface Menu extends Settings {
   entries: { day: number; slot: Slot; version_id: string; recipe_id: string; name: string }[];
   totals: { day: number; date: string; total: Nutrition; difference: Nutrition }[];
   problems: string[];
+  shopping: { week: number; ingredient_id: string; name: string; unit: Unit; quantity: string }[];
 }
 export interface Plan {
   id: string;

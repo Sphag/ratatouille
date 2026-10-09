@@ -115,8 +115,10 @@ def improve(
     scale: Vector,
     limit: int | None,
     previous: Counter[int],
+    locked: set[tuple[int, int]] | None = None,
 ) -> Week:
     """Coordinate replacements, optional first courses and swaps; accept strict improvement."""
+    locked = locked or set()
     current = score(week, weights, values, target, scale, previous)
     for _ in range(IMPROVEMENT_ROUNDS):
         changed = False
@@ -125,6 +127,8 @@ def improve(
         for day, row in enumerate(week):
             weight = weights[day]
             for slot in range(4):
+                if (day, slot) in locked:
+                    continue
                 old = row[slot]
                 best = old
                 best_score = current
@@ -164,6 +168,8 @@ def improve(
                 for b in range(a + 1, len(week)):
                     for sa in range(4):
                         for sb in range(4):
+                            if (a, sa) in locked or (b, sb) in locked:
+                                continue
                             x, y = week[a][sa], week[b][sb]
                             if x == y or (x is None and sb != 1) or (y is None and sa != 1):
                                 continue

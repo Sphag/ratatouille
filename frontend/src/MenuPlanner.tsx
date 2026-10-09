@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { MenuProposal } from './MenuProposal';
-import { decimal, nutrients, request, type Recipe } from './recipes';
+import { MenuReplacement } from './MenuReplacement';
+import { decimal, nutrients, request, units, type Recipe } from './recipes';
 import {
   dateLabel,
   numberLabel,
@@ -118,6 +119,7 @@ function MenuEditor({
   const initial = { mode: menu.mode, repeat_limit: menu.repeat_limit, targets: menu.targets };
   const [settings, setSettings] = useState<Settings>(initial);
   const [confirming, setConfirming] = useState(false);
+  const [replacing, setReplacing] = useState(false);
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const dirty = JSON.stringify(settings) !== JSON.stringify(initial);
   const draft = menu.state === 'draft';
@@ -178,6 +180,17 @@ function MenuEditor({
     )
       back();
   }
+  if (replacing)
+    return (
+      <MenuReplacement
+        menu={menu}
+        recipes={recipes}
+        busy={busy}
+        act={act}
+        update={update}
+        back={() => setReplacing(false)}
+      />
+    );
   if (proposal)
     return (
       <MenuProposal
@@ -322,6 +335,27 @@ function MenuEditor({
           ))}
         </div>
       )}
+      {draft && (
+        <button
+          className="secondary"
+          disabled={frozen || menu.problems.length > 0}
+          onClick={() => setReplacing(true)}
+        >
+          Заменить блюдо с просмотром
+        </button>
+      )}
+      <section className="menu-panel">
+        <h2>Покупки этой недели</h2>
+        <ul>
+          {menu.shopping
+            .filter((s) => s.week === week)
+            .map((s) => (
+              <li key={`${s.ingredient_id}-${units[s.unit]}`}>
+                {s.name}: {numberLabel(s.quantity)} {units[s.unit]}
+              </li>
+            ))}
+        </ul>
+      </section>
       <section className="menu-panel">
         <h2>КБЖУ по дням</h2>
         <p className="hint">
