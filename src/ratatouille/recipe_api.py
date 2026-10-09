@@ -71,9 +71,7 @@ def install_recipe_api(
     def bad_input(request: Request, error: RequestValidationError) -> JSONResponse:
         return JSONResponse(
             status_code=422,
-            content={
-                "detail": "Проверьте название, КБЖУ, выход рецепта и количества ингредиентов."
-            },
+            content={"detail": "Проверьте поля формы: даты, числа и обязательные значения."},
         )
 
     @router.get("/recipes")

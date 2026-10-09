@@ -8,7 +8,9 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 
-def create_app(frontend_dir: Path | None = None, *, recipes_enabled: bool = False) -> FastAPI:
+def create_app(
+    frontend_dir: Path | None = None, *, recipes_enabled: bool = False, menus_enabled: bool = False
+) -> FastAPI:
     """Create the web process without bot credentials or a database connection."""
     directory = frontend_dir or Path(os.getenv("RATATOUILLE_FRONTEND_DIR", "frontend/dist"))
     application = FastAPI(title="Ratatouille", version="0.1.0")
@@ -20,7 +22,7 @@ def create_app(frontend_dir: Path | None = None, *, recipes_enabled: bool = Fals
 
     @application.get("/api/capabilities")
     def capabilities() -> dict[str, bool]:
-        return {"recipes": recipes_enabled}
+        return {"recipes": recipes_enabled, "menus": menus_enabled}
 
     @application.get("/", include_in_schema=False)
     def index() -> FileResponse:

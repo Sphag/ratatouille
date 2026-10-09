@@ -7,6 +7,95 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.menu-panel {
+  background: #fffdf7;
+  border: 1px solid #dedfcd;
+  padding: 20px;
+  border-radius: 18px;
+  margin: 16px 0;
+  min-width: 0;
+}
+.menu-panel h2 {
+  margin-top: 0;
+}
+.menu-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  min-width: 0;
+}
+.menu-panel input,
+.menu-panel select {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #bcc9b8;
+  background: #fff;
+  color: inherit;
+}
+.menu-templates,
+.menu-settings,
+.menu-days,
+.plan-list,
+.daily-totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.daily-totals {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.daily-totals article {
+  background: #f4f4e9;
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 0;
+}
+.daily-totals h3 {
+  margin: 0 0 12px;
+}
+.daily-totals dl {
+  margin: 0;
+}
+.daily-totals dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+}
+.daily-totals dt {
+  font-size: 14px;
+}
+.daily-totals dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.daily-totals dd span {
+  display: block;
+  font-size: 13px;
+  color: #657368;
+}
+.menu-workspace .nutrition-summary {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .menu-templates,
+  .menu-settings,
+  .menu-days,
+  .plan-list {
+    grid-template-columns: 1fr;
+  }
+  .menu-panel {
+    padding: 16px;
+  }
+  .daily-totals {
+    grid-template-columns: 1fr;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
