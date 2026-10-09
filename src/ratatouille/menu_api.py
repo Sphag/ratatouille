@@ -3,9 +3,10 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, Response
 
 from ratatouille.access import Guard, OwnerResolver, owner_dependency
+from ratatouille.calendar_export import export_calendar
 from ratatouille.catalog import NutritionFields, StoredNutrition
 from ratatouille.fulfilment import CookingRequest, Fulfilment, FulfilmentView, ShoppingRequest
 from ratatouille.menus import (
@@ -41,6 +42,14 @@ def install_menu_api(
     fulfilment = Fulfilment(menus.store)
 
     schedules = Schedules(menus.store)
+
+    @router.get("/plans/{identifier}/calendar.ics")
+    def calendar(identifier: str, owner: str = Depends(resolve_owner)) -> Response:
+        return Response(
+            export_calendar(menus.store, owner, identifier),
+            media_type="text/calendar; charset=utf-8",
+            headers={"Content-Disposition": 'attachment; filename="ratatouille.ics"'},
+        )
 
     @router.get("/schedule")
     def schedule(owner: str = Depends(resolve_owner)) -> ScheduleView:

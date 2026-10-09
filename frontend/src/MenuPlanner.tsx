@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { MenuProposal } from './MenuProposal';
 import { MenuReplacement } from './MenuReplacement';
+import { CalendarExport } from './CalendarExport';
 import { Fulfilment } from './Fulfilment';
 import { decimal, nutrients, request, type Recipe } from './recipes';
 import {
@@ -346,6 +347,7 @@ function MenuEditor({
         </button>
       )}
       <Fulfilment menu={menu} week={week} busy={busy} act={act} />
+      {menu.state === 'confirmed' && <CalendarExport planId={menu.plan_id} />}
       <section className="menu-panel">
         <h2>КБЖУ по дням</h2>
         <p className="hint">
