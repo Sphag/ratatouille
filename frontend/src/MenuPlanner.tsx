@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { MenuProposal } from './MenuProposal';
 import { decimal, nutrients, request, type Recipe } from './recipes';
 import {
   dateLabel,
@@ -10,6 +11,7 @@ import {
   type Plan,
   type Settings,
   type Slot,
+  type Proposal,
 } from './menus';
 
 function NutritionInputs({
@@ -116,6 +118,7 @@ function MenuEditor({
   const initial = { mode: menu.mode, repeat_limit: menu.repeat_limit, targets: menu.targets };
   const [settings, setSettings] = useState<Settings>(initial);
   const [confirming, setConfirming] = useState(false);
+  const [proposal, setProposal] = useState<Proposal | null>(null);
   const dirty = JSON.stringify(settings) !== JSON.stringify(initial);
   const draft = menu.state === 'draft';
   const frozen = busy || dirty || !draft;
@@ -175,6 +178,27 @@ function MenuEditor({
     )
       back();
   }
+  if (proposal)
+    return (
+      <MenuProposal
+        proposal={proposal}
+        busy={busy}
+        onDiscard={() => setProposal(null)}
+        onApply={() =>
+          act(async () => {
+            await mutate(
+              'proposal',
+              {
+                expected_number: menu.number,
+                positions: proposal.positions,
+                digest: proposal.digest,
+              },
+              'PUT',
+            );
+          })
+        }
+      />
+    );
   return (
     <>
       <button className="text-button" disabled={busy} onClick={leave}>
@@ -191,6 +215,27 @@ function MenuEditor({
         <p className="notice">
           Блюда сохраняются в черновике. Подтвердите меню, чтобы сохранить план.
         </p>
+      )}
+      {draft && (
+        <section className="menu-panel">
+          <h2>Предложить меню</h2>
+          <p>Подбор использует ваши цели, режим повторов и только явно допущенные рецепты.</p>
+          <button
+            className="secondary"
+            disabled={frozen}
+            onClick={() =>
+              void act(async () => {
+                setProposal(
+                  await request<Proposal>(`menu/revisions/${menu.id}/proposal`, 'POST', {
+                    expected_number: menu.number,
+                  }),
+                );
+              })
+            }
+          >
+            {busy ? 'Подбираем…' : 'Предложить меню'}
+          </button>
+        </section>
       )}
       <form
         className="menu-panel"

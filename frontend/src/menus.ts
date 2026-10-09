@@ -32,6 +32,11 @@ export interface Plan {
   confirmed_id: string | null;
   drafts: string[];
 }
+export interface Proposal {
+  menu: Menu;
+  positions: { day: number; slot: Slot; version_id: string }[];
+  digest: string;
+}
 export function dateLabel(value: string): string {
   return new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',

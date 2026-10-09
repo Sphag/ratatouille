@@ -18,6 +18,17 @@
 .menu-panel h2 {
   margin-top: 0;
 }
+.proposal-dishes div {
+  margin-bottom: 12px;
+}
+.proposal-dishes dt {
+  color: #657368;
+  font-size: 14px;
+}
+.proposal-dishes dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
 .menu-panel label {
   display: flex;
   flex-direction: column;
