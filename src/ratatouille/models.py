@@ -347,3 +347,16 @@ class ErrorNotice(Owned, Base):
     __tablename__ = "error_notices"
     window: Mapped[int]
     __table_args__ = (UniqueConstraint("owner_id", "window"),)
+
+
+class CalendarVersion(Owned, Base):
+    __tablename__ = "calendar_versions"
+    plan_id: Mapped[str]
+    digest: Mapped[str]
+    sequence: Mapped[int]
+    updated_at: Mapped[int]
+    __table_args__ = (
+        UniqueConstraint("owner_id", "plan_id"),
+        ForeignKeyConstraint(["plan_id", "owner_id"], ["plans.id", "plans.owner_id"]),
+        CheckConstraint("sequence >= 0", name="calendar_sequence"),
+    )

@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from pydantic import Field, field_validator, model_validator
 from sqlalchemy import delete, select
+from sqlalchemy.orm import Session
 
 from ratatouille.catalog import Contract
 from ratatouille.domain import ConflictError, ReminderKind, Schedule
@@ -139,18 +140,26 @@ class PlannedEvent:
     text: str
 
 
-def planned_events(store: Store, owner: str) -> list[PlannedEvent]:
-    schedules = store.get_schedule(owner)
-    with store._session() as session:
-        plans = list(
-            session.scalars(
-                select(Plan).where(Plan.owner_id == owner, Plan.current_revision_id.is_not(None))
-            )
+def planned_events(
+    store: Store, owner: str, *, session: Session | None = None
+) -> list[PlannedEvent]:
+    if session is None:
+        with store._session() as current:
+            return planned_events(store, owner, session=current)
+    store._user(session, owner)
+    schedules = tuple(
+        Schedule(r.kind, r.weekday, r.at, r.enabled, r.timezone)
+        for r in session.scalars(select(Reminder).where(Reminder.owner_id == owner))
+    )
+    plans = list(
+        session.scalars(
+            select(Plan).where(Plan.owner_id == owner, Plan.current_revision_id.is_not(None))
         )
+    )
     events: list[PlannedEvent] = []
     for plan in plans:
         assert plan.current_revision_id is not None
-        revision = store.get_revision(owner, plan.current_revision_id)
+        revision = store._revision(session, owner, plan.current_revision_id)
         for day in range(plan.days):
             calendar_day = plan.start_date + timedelta(days=day)
             for schedule in schedules:
