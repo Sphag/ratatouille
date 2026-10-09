@@ -19,11 +19,31 @@ from ratatouille.menus import (
 )
 from ratatouille.proposals import ApplyProposal, Proposal, Proposals
 from ratatouille.recipe_api import local_request
+from ratatouille.replacements import (
+    ApplyReplacement,
+    ReplacementLocation,
+    ReplacementPreview,
+    ReplacementRequest,
+    Replacements,
+)
 
 
 def install_menu_api(application: FastAPI, menus: Menus, owner: str) -> None:
     router = APIRouter(prefix="/api/menu", dependencies=[Depends(local_request)])
     proposals = Proposals(menus)
+    replacements = Replacements(menus)
+
+    @router.post("/revisions/{identifier}/replacement-options")
+    def replacement_options(identifier: str, data: ReplacementLocation) -> list[MenuView]:
+        return replacements.suggestions(owner, identifier, data)
+
+    @router.post("/revisions/{identifier}/replacement")
+    def replacement(identifier: str, data: ReplacementRequest) -> ReplacementPreview:
+        return replacements.preview(owner, identifier, data)
+
+    @router.put("/revisions/{identifier}/replacement")
+    def apply_replacement(identifier: str, data: ApplyReplacement) -> MenuView:
+        return replacements.apply(owner, identifier, data)
 
     @router.post("/revisions/{identifier}/proposal")
     def proposal(identifier: str, data: Expected) -> Proposal:

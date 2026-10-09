@@ -15,6 +15,7 @@ from ratatouille.domain import (
     RepeatMode,
     RevisionState,
     Slot,
+    Unit,
     ValidationError,
     positive_integer,
 )
@@ -94,6 +95,14 @@ class DayView(Contract):
     difference: StoredNutrition  # Signed decimal strings, unlike input NutritionFields.
 
 
+class ShoppingView(Contract):
+    week: int
+    ingredient_id: str
+    name: str
+    unit: Unit
+    quantity: str
+
+
 class MenuView(Contract):
     id: str
     plan_id: str
@@ -107,6 +116,7 @@ class MenuView(Contract):
     entries: list[MenuEntryView]
     totals: list[DayView]
     problems: list[str]
+    shopping: list[ShoppingView]
 
 
 class PlanSummary(Contract):
@@ -185,6 +195,16 @@ def view(revision: PlanRevision) -> MenuView:
             for d in calculation.days
         ],
         problems=problems(revision),
+        shopping=[
+            ShoppingView(
+                week=s.week,
+                ingredient_id=s.ingredient_id,
+                name=s.name,
+                unit=s.unit,
+                quantity=format(s.quantity, "f"),
+            )
+            for s in calculation.shopping
+        ],
     )
 
 
