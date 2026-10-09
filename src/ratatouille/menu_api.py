@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, FastAPI
 
 from ratatouille.catalog import NutritionFields, StoredNutrition
+from ratatouille.fulfilment import CookingRequest, Fulfilment, FulfilmentView, ShoppingRequest
 from ratatouille.menus import (
     ConfigureMenu,
     CreateMenu,
@@ -32,6 +33,19 @@ def install_menu_api(application: FastAPI, menus: Menus, owner: str) -> None:
     router = APIRouter(prefix="/api/menu", dependencies=[Depends(local_request)])
     proposals = Proposals(menus)
     replacements = Replacements(menus)
+    fulfilment = Fulfilment(menus.store)
+
+    @router.get("/revisions/{identifier}/fulfilment")
+    def fulfilment_view(identifier: str) -> FulfilmentView:
+        return fulfilment.get(owner, identifier)
+
+    @router.put("/revisions/{identifier}/shopping-check")
+    def shopping_check(identifier: str, data: ShoppingRequest) -> FulfilmentView:
+        return fulfilment.mark(owner, identifier, data)
+
+    @router.put("/revisions/{identifier}/cooking-check")
+    def cooking_check(identifier: str, data: CookingRequest) -> FulfilmentView:
+        return fulfilment.mark(owner, identifier, data)
 
     @router.post("/revisions/{identifier}/replacement-options")
     def replacement_options(identifier: str, data: ReplacementLocation) -> list[MenuView]:

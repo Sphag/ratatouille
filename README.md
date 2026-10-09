@@ -22,7 +22,7 @@ Ratatouille помогает заранее составить рацион, с�
 
 ## Запуск и развёртывание
 
-Созданы HTTP-сервер, хранение в SQLite, расчётная основа меню и формы библиотеки рецептов, ручного меню, автоматического предложения и замены с пересчётом для локальной разработки. Telegram-бот ещё разрабатывается. Сервер — Python 3.13 с FastAPI, клиент — React и TypeScript.
+Созданы HTTP-сервер, хранение в SQLite, расчётная основа меню и формы библиотеки рецептов, ручного меню, автоматического предложения и замены с пересчётом, покупки, партии готовки и чек-листы для локальной разработки. Telegram-бот ещё разрабатывается. Сервер — Python 3.13 с FastAPI, клиент — React и TypeScript.
 
 Проверенный локальный запуск — WSL/Linux x86_64, Git, curl и Node.js 24. Из корня проекта:
 
@@ -71,6 +71,6 @@ npm --prefix frontend run format
 
 ## Подробнее
 
-[Спецификация](docs/PROJECT_BRIEF.md) · [План разработки](docs/BACKLOG.md) · [Архитектура](docs/ARCHITECTURE.md) · [Ручное меню](docs/T07_MANUAL_MENU.md) · [Автоматический подбор](docs/T08_GENERATION.md) · [Замена блюд](docs/T09_REPLACEMENTS.md) · [Инструменты разработчика](docs/DEVELOPMENT.md)
+[Спецификация](docs/PROJECT_BRIEF.md) · [План разработки](docs/BACKLOG.md) · [Архитектура](docs/ARCHITECTURE.md) · [Ручное меню](docs/T07_MANUAL_MENU.md) · [Автоматический подбор](docs/T08_GENERATION.md) · [Замена блюд](docs/T09_REPLACEMENTS.md) · [Покупки и готовка](docs/T10_FULFILMENT.md) · [Инструменты разработчика](docs/DEVELOPMENT.md)
 
 Лицензия: [MIT](LICENSE).
