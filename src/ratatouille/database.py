@@ -41,7 +41,7 @@ def make_engine(path: Path) -> Engine:
 def migrate(path: Path | None = None) -> None:
     target = path if path is not None else database_path()
     target.parent.mkdir(parents=True, exist_ok=True)
-    root = Path(__file__).resolve().parents[2]
+    root = Path(os.getenv("RATATOUILLE_MIGRATIONS_ROOT", str(Path(__file__).resolve().parents[2])))
     config = Config(str(root / "alembic.ini"))
     config.set_main_option("script_location", str(root / "migrations"))
     engine = make_engine(target)

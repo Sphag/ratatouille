@@ -100,3 +100,7 @@ HTTP-процесс принимает запросы по `/api/` и выдаё
 ## Календарь (T13)
 
 `calendar_export.py` создаёт RFC5545 через icalendar и сохраняет последовательность версии в таблице `calendar_versions` (миграция `0004`). Общий `planned_events` читает согласованный снимок в одной транзакции. `CalendarExport.tsx` скачивает авторизованный файл. Правила ручного обновления — [T13_CALENDAR.md](T13_CALENDAR.md).
+
+## Выпуск (T14)
+
+Dockerfile собирает image web/бота с внешним SQLite-томом; compose.yaml и deploy/Caddyfile обеспечивают HTTP/TLS. Workflows ci.yml проверяет приложение и контейнер, release.yml вручную выпускает main через SSH. tools/deploy/ содержит smoke/release; backup.py создаёт согласованную копию. Подробнее — [T14_RELEASE.md](T14_RELEASE.md).

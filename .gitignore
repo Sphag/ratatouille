@@ -55,3 +55,7 @@ logs/
 # Локальные файлы операционной системы.
 .DS_Store
 Thumbs.db
+
+# Deployment-only secrets and private release state.
+/deploy/.secrets/
+/deploy/.release/

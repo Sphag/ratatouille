@@ -30,6 +30,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/ratatouille"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"data/starter_recipes.json" = "ratatouille/data/starter_recipes.json"
+
 [tool.pytest.ini_options]
 testpaths = ["tests", "tools/publication"]
 addopts = "-ra"

@@ -1,0 +1,52 @@
+name: Release to VPS
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Check release from locks
+        run: |
+          bash tools/dev/setup.sh
+          bash tools/dev/check.sh
+          python3 tools/publication/prepare.py
+      - name: Build and smoke-test release image
+        run: |
+          docker build -t "ratatouille:$GITHUB_SHA" .
+          bash tools/deploy/container-check.sh "ratatouille:$GITHUB_SHA"
+          docker save "ratatouille:$GITHUB_SHA" | gzip > image.tar.gz
+      - name: Transfer and release after manual dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?Configure production secrets}"
+          : "${DEPLOY_USER:?Configure production secrets}"
+          : "${DEPLOY_KEY:?Configure production secrets}"
+          : "${DEPLOY_KNOWN_HOSTS:?Configure production secrets}"
+          mkdir -p "$RUNNER_TEMP/ratatouille-ssh"
+          printf '%s\n' "$DEPLOY_KEY" > "$RUNNER_TEMP/ratatouille-ssh/key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ratatouille-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/ratatouille-ssh/key"
+          ssh_options=(-i "$RUNNER_TEMP/ratatouille-ssh/key" -o "UserKnownHostsFile=$RUNNER_TEMP/ratatouille-ssh/known_hosts" -o StrictHostKeyChecking=yes -o BatchMode=yes)
+          ssh "${ssh_options[@]}" "$DEPLOY_USER@$DEPLOY_HOST" 'mkdir -p /opt/ratatouille/deploy /opt/ratatouille/tools/deploy'
+          scp "${ssh_options[@]}" image.tar.gz compose.yaml "$DEPLOY_USER@$DEPLOY_HOST:/opt/ratatouille/"
+          scp "${ssh_options[@]}" deploy/Caddyfile "$DEPLOY_USER@$DEPLOY_HOST:/opt/ratatouille/deploy/"
+          scp "${ssh_options[@]}" tools/deploy/release.sh "$DEPLOY_USER@$DEPLOY_HOST:/opt/ratatouille/tools/deploy/"
+          ssh "${ssh_options[@]}" "$DEPLOY_USER@$DEPLOY_HOST" "cd /opt/ratatouille && gzip -dc image.tar.gz | docker load && bash tools/deploy/release.sh '$GITHUB_SHA'"
