@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { telegramData } from './telegram';
 import icon from '../../assets/icon.png';
 import { RecipeForm } from './RecipeForm';
 import { MenuPlanner } from './MenuPlanner';
@@ -61,6 +62,7 @@ function Details({ recipe }: { recipe: RecipeFields }) {
 }
 export function App() {
   const [data, setData] = useState<Data | null>(null);
+  const [telegramRequired, setTelegramRequired] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [tab, setTab] = useState<Tab>('active');
   const [editor, setEditor] = useState<Editor>(null);
@@ -73,9 +75,14 @@ export function App() {
   const [menusEnabled, setMenusEnabled] = useState(false);
   useEffect(() => {
     let active = true;
-    void request<{ recipes: boolean; menus: boolean }>('capabilities')
+    void request<{ recipes: boolean; menus: boolean; telegram?: boolean }>('capabilities')
       .then(async (capabilities) => {
         if (!active) return;
+        if (capabilities.telegram && !telegramData()) {
+          setTelegramRequired(true);
+          setUnavailable(true);
+          return;
+        }
         setMenusEnabled(capabilities.menus);
         if (!capabilities.recipes) {
           setUnavailable(true);
@@ -177,7 +184,11 @@ export function App() {
         <p className="welcome__eyebrow">Готовим неделю заранее</p>
         <h1>Ratatouille</h1>
         <p className="welcome__description">Меню, покупки и готовка на неделю — в Telegram.</p>
-        <p className="welcome__status">Приложение готовится к запуску.</p>
+        <p className="welcome__status">
+          {telegramRequired
+            ? 'Откройте приложение через кнопку Ratatouille в Telegram.'
+            : 'Приложение готовится к запуску.'}
+        </p>
       </main>
     );
   return (

@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
+from ratatouille.access import Guard, OwnerResolver, owner_dependency
 from ratatouille.catalog import Catalog, Contract, Flags, RecipeCard, SaveRecipe, StarterLibrary
 from ratatouille.domain import ConflictError, NotFoundError, ValidationError
 
@@ -45,9 +46,14 @@ class StarterPreview(Contract):
 
 
 def install_recipe_api(
-    application: FastAPI, catalog: Catalog, owner: str, library: StarterLibrary
+    application: FastAPI,
+    catalog: Catalog,
+    owner: str | OwnerResolver,
+    library: StarterLibrary,
+    guard: Guard = local_request,
 ) -> None:
-    router = APIRouter(prefix="/api", dependencies=[Depends(local_request)])
+    resolve_owner = owner_dependency(owner)
+    router = APIRouter(prefix="/api", dependencies=[Depends(guard)])
 
     @application.middleware("http")
     async def private_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
@@ -75,33 +81,33 @@ def install_recipe_api(
         )
 
     @router.get("/recipes")
-    def recipes(archived: bool = False) -> list[RecipeCard]:
+    def recipes(archived: bool = False, owner: str = Depends(resolve_owner)) -> list[RecipeCard]:
         return catalog.list_cards(owner, archived=archived)
 
     @router.get("/ingredients")
-    def ingredients() -> list[dict[str, str]]:
+    def ingredients(owner: str = Depends(resolve_owner)) -> list[dict[str, str]]:
         return catalog.ingredients(owner)
 
     @router.post("/recipes", status_code=201)
-    def create(data: SaveRecipe) -> RecipeCard:
+    def create(data: SaveRecipe, owner: str = Depends(resolve_owner)) -> RecipeCard:
         return catalog.save(owner, data)
 
     @router.put("/recipes/{recipe_id}")
-    def edit(recipe_id: str, data: SaveRecipe) -> RecipeCard:
+    def edit(recipe_id: str, data: SaveRecipe, owner: str = Depends(resolve_owner)) -> RecipeCard:
         return catalog.save(owner, data, recipe_id)
 
     @router.patch("/recipes/{recipe_id}/flags")
-    def flags(recipe_id: str, data: Flags) -> RecipeCard:
+    def flags(recipe_id: str, data: Flags, owner: str = Depends(resolve_owner)) -> RecipeCard:
         return catalog.flags(owner, recipe_id, data)
 
     @router.get("/starter-library")
-    def starters() -> StarterPreview:
+    def starters(owner: str = Depends(resolve_owner)) -> StarterPreview:
         return StarterPreview(
             library=library, digest=library.digest, imported=catalog.imported(owner, library)
         )
 
     @router.post("/starter-library/import")
-    def import_library(data: ImportRequest) -> dict[str, int]:
+    def import_library(data: ImportRequest, owner: str = Depends(resolve_owner)) -> dict[str, int]:
         if data.digest != library.digest:
             raise ConflictError("Стартовые карточки изменились. Обновите список перед импортом.")
         return {"imported": catalog.import_starters(owner, library, confirmed=data.confirmed)}
