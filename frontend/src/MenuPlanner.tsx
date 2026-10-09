@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { MenuProposal } from './MenuProposal';
 import { MenuReplacement } from './MenuReplacement';
-import { decimal, nutrients, request, units, type Recipe } from './recipes';
+import { Fulfilment } from './Fulfilment';
+import { decimal, nutrients, request, type Recipe } from './recipes';
 import {
   dateLabel,
   numberLabel,
@@ -344,18 +345,7 @@ function MenuEditor({
           Заменить блюдо с просмотром
         </button>
       )}
-      <section className="menu-panel">
-        <h2>Покупки этой недели</h2>
-        <ul>
-          {menu.shopping
-            .filter((s) => s.week === week)
-            .map((s) => (
-              <li key={`${s.ingredient_id}-${units[s.unit]}`}>
-                {s.name}: {numberLabel(s.quantity)} {units[s.unit]}
-              </li>
-            ))}
-        </ul>
-      </section>
+      <Fulfilment menu={menu} week={week} busy={busy} act={act} />
       <section className="menu-panel">
         <h2>КБЖУ по дням</h2>
         <p className="hint">
