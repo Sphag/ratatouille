@@ -21,6 +21,7 @@ from ratatouille.menus import (
 )
 from ratatouille.proposals import ApplyProposal, Proposal, Proposals
 from ratatouille.recipe_api import local_request
+from ratatouille.reminders import SaveSchedule, Schedules, ScheduleView
 from ratatouille.replacements import (
     ApplyReplacement,
     ReplacementLocation,
@@ -38,6 +39,16 @@ def install_menu_api(
     proposals = Proposals(menus)
     replacements = Replacements(menus)
     fulfilment = Fulfilment(menus.store)
+
+    schedules = Schedules(menus.store)
+
+    @router.get("/schedule")
+    def schedule(owner: str = Depends(resolve_owner)) -> ScheduleView:
+        return schedules.get(owner)
+
+    @router.put("/schedule")
+    def save_schedule(data: SaveSchedule, owner: str = Depends(resolve_owner)) -> ScheduleView:
+        return schedules.save(owner, data)
 
     @router.get("/revisions/{identifier}/fulfilment")
     def fulfilment_view(identifier: str, owner: str = Depends(resolve_owner)) -> FulfilmentView:

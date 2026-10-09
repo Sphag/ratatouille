@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { telegramData } from './telegram';
 import icon from '../../assets/icon.png';
 import { RecipeForm } from './RecipeForm';
+import { ScheduleSettings } from './ScheduleSettings';
 import { MenuPlanner } from './MenuPlanner';
 import {
   ApiError,
@@ -71,7 +72,8 @@ export function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [confirmed, setConfirmed] = useState(false);
-  const [workspace, setWorkspace] = useState<'recipes' | 'menus'>('recipes');
+  const [workspace, setWorkspace] = useState<'recipes' | 'menus' | 'schedule'>('recipes');
+  const [scheduleConfigured, setScheduleConfigured] = useState(true);
   const [menusEnabled, setMenusEnabled] = useState(false);
   useEffect(() => {
     let active = true;
@@ -219,13 +221,30 @@ export function App() {
             >
               Меню
             </button>
+            <button
+              className={workspace === 'schedule' ? 'tab active' : 'tab'}
+              aria-current={workspace === 'schedule' ? 'page' : undefined}
+              disabled={busy || !!editor}
+              onClick={() => setWorkspace('schedule')}
+            >
+              Напоминания
+            </button>
           </nav>
+          {!scheduleConfigured && workspace !== 'schedule' && (
+            <p className="notice">
+              Напоминания выключены. Задайте дни и время в разделе «Напоминания».
+            </p>
+          )}
+          <ScheduleSettings
+            active={workspace === 'schedule'}
+            onConfigured={setScheduleConfigured}
+          />
           <div hidden={workspace !== 'menus'}>
             <MenuPlanner active={workspace === 'menus'} />
           </div>
         </>
       )}
-      {workspace === 'menus' ? null : !data ? (
+      {workspace !== 'recipes' ? null : !data ? (
         <section aria-live="polite">
           <h1>Библиотека рецептов</h1>
           {error ? (
