@@ -1,14 +1,14 @@
 :root {
   font-family: system-ui, sans-serif;
-  color: #283c31;
-  background: #faf7ef;
+  color: var(--app-text, #283c31);
+  background: var(--app-bg, #faf7ef);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
 .menu-panel {
-  background: #fffdf7;
+  background: var(--app-panel, #fffdf7);
   border: 1px solid #dedfcd;
   padding: 20px;
   border-radius: 18px;
@@ -22,7 +22,7 @@
   margin-bottom: 12px;
 }
 .proposal-dishes dt {
-  color: #657368;
+  color: var(--app-hint, #657368);
   font-size: 14px;
 }
 .proposal-dishes dd {
@@ -42,7 +42,7 @@
   min-width: 0;
   padding: 12px;
   border: 1px solid #bcc9b8;
-  background: #fff;
+  background: var(--app-panel, #fff);
   color: inherit;
 }
 .menu-templates,
@@ -58,7 +58,7 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 .daily-totals article {
-  background: #f4f4e9;
+  background: var(--app-panel, #f4f4e9);
   border-radius: 12px;
   padding: 12px;
   min-width: 0;
@@ -87,7 +87,7 @@
 .daily-totals dd span {
   display: block;
   font-size: 13px;
-  color: #657368;
+  color: var(--app-hint, #657368);
 }
 .menu-workspace .nutrition-summary {
   overflow-wrap: anywhere;
@@ -132,7 +132,7 @@ body {
 
 .welcome__eyebrow {
   margin-top: 28px;
-  color: #657368;
+  color: var(--app-hint, #657368);
   font-size: 16px;
 }
 
@@ -149,7 +149,7 @@ h1 {
 
 .welcome__status {
   margin-top: 28px;
-  color: #657368;
+  color: var(--app-hint, #657368);
   font-size: 16px;
   line-height: 1.5;
 }
@@ -204,7 +204,7 @@ summary:focus-visible {
 }
 .brand span,
 .hint {
-  color: #657368;
+  color: var(--app-hint, #657368);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -221,7 +221,7 @@ summary:focus-visible {
   margin-top: 28px;
 }
 .eyebrow {
-  color: #657368;
+  color: var(--app-hint, #657368);
   margin: 0;
 }
 .title-row {
@@ -234,40 +234,41 @@ summary:focus-visible {
 .secondary {
   min-height: 44px;
   padding: 12px 18px;
-  border: 1px solid #2e513c;
+  border: 1px solid var(--app-button, #2e513c);
   font-weight: 650;
 }
 .primary {
-  background: #2e513c;
+  background: var(--app-button, #2e513c);
   color: white;
 }
 .secondary {
   background: transparent;
-  color: #2e513c;
+  color: var(--app-button, #2e513c);
 }
 .text-button {
   background: transparent;
-  color: #2e513c;
+  color: var(--app-button, #2e513c);
   border: 0;
   padding: 10px 0;
 }
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin: 12px 0 24px;
   border-bottom: 1px solid #d6ded4;
 }
 .tab {
   background: transparent;
-  color: #657368;
+  color: var(--app-hint, #657368);
   border: 0;
   border-bottom: 3px solid transparent;
   border-radius: 0;
   padding: 14px 10px;
 }
 .tab.active {
-  color: #2e513c;
-  border-color: #2e513c;
+  color: var(--app-button, #2e513c);
+  border-color: var(--app-button, #2e513c);
   font-weight: 700;
 }
 .recipe-grid {
@@ -277,11 +278,11 @@ summary:focus-visible {
   margin-top: 24px;
 }
 .recipe-card {
-  background: white;
+  background: var(--app-panel, white);
   border: 1px solid #d6ded4;
   padding: 22px;
   text-align: left;
-  color: #283c31;
+  color: var(--app-text, #283c31);
   overflow-wrap: anywhere;
 }
 .recipe-card h2 {
@@ -305,12 +306,12 @@ summary:focus-visible {
   display: block;
   font-size: 14px;
   font-weight: 400;
-  color: #657368;
+  color: var(--app-hint, #657368);
 }
 .card-link {
   display: block;
   margin-top: 22px;
-  color: #2e513c;
+  color: var(--app-button, #2e513c);
   font-weight: 650;
 }
 .empty {
@@ -358,9 +359,9 @@ textarea {
   display: block;
   width: 100%;
   min-height: 44px;
-  background: white;
+  background: var(--app-panel, white);
   border: 1px solid #b4c4b5;
-  color: #283c31;
+  color: var(--app-text, #283c31);
   padding: 10px 12px;
   margin-top: 8px;
 }
@@ -402,7 +403,7 @@ textarea {
   min-height: 22px;
   height: 22px;
   margin: 2px 0 0;
-  accent-color: #2e513c;
+  accent-color: var(--app-button, #2e513c);
 }
 .actions {
   display: flex;
@@ -439,7 +440,7 @@ textarea {
 }
 .import-panel {
   margin: 24px 0;
-  background: #eef2e9;
+  background: var(--app-panel, #eef2e9);
   padding: 20px;
   border-radius: 16px;
 }
@@ -528,5 +529,15 @@ input[type='radio'] {
   min-height: 22px;
   padding: 0;
   margin: 0;
-  accent-color: #2e513c;
+  accent-color: var(--app-button, #2e513c);
+}
+
+main.library {
+  padding-top: calc(24px + var(--safe-top, 0px));
+  padding-bottom: calc(64px + var(--safe-bottom, 0px));
+  padding-left: calc(24px + var(--safe-left, 0px));
+  padding-right: calc(24px + var(--safe-right, 0px));
+}
+.primary {
+  color: var(--app-button-text, #fff);
 }

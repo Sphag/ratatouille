@@ -74,3 +74,5 @@ npm --prefix frontend run format
 [Спецификация](docs/PROJECT_BRIEF.md) · [План разработки](docs/BACKLOG.md) · [Архитектура](docs/ARCHITECTURE.md) · [Ручное меню](docs/T07_MANUAL_MENU.md) · [Автоматический подбор](docs/T08_GENERATION.md) · [Замена блюд](docs/T09_REPLACEMENTS.md) · [Покупки и готовка](docs/T10_FULFILMENT.md) · [Инструменты разработчика](docs/DEVELOPMENT.md)
 
 Лицензия: [MIT](LICENSE).
+
+Telegram-интеграция реализована; настройка и границы проверки описаны в [T11](docs/T11_TELEGRAM.md). Реальные Telegram-клиенты и VPS пока не проверены.

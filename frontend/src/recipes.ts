@@ -1,3 +1,4 @@
+import { telegramData } from './telegram';
 export type Unit = 'g' | 'kg' | 'ml' | 'l' | 'piece';
 export const units: Record<Unit, string> = { g: 'г', kg: 'кг', ml: 'мл', l: 'л', piece: 'шт.' };
 export const nutrients = [
@@ -43,7 +44,11 @@ export async function request<T>(path: string, method = 'GET', body?: unknown): 
   try {
     response = await fetch(`/api/${path}`, {
       method,
-      headers: { 'Content-Type': 'application/json', 'X-Ratatouille-Request': '1' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Ratatouille-Request': '1',
+        ...(telegramData() ? { Authorization: `tma ${telegramData()}` } : {}),
+      },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
   } catch {
