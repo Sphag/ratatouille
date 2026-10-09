@@ -1,6 +1,6 @@
 {
   "id": "starter-v1",
-  "approved": false,
+  "approved": true,
   "recipes": [
     {
       "source_id": "starter-01",
