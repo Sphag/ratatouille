@@ -1,10 +1,12 @@
 """Explicit production factory; migration and credentials are never loaded at import."""
 
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from urllib.parse import urlsplit
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from ratatouille.app import create_app
 from ratatouille.catalog import Catalog, load_starters
@@ -28,6 +30,27 @@ def telegram_app(store: Store, token: str, app_url: str, allowed_ids: frozenset[
     application = create_app(recipes_enabled=True, menus_enabled=True, telegram_enabled=True)
     install_recipe_api(application, Catalog(store), access.owner, load_starters(), access.guard)
     install_menu_api(application, Menus(store), access.owner, access.guard)
+
+    @application.get("/api/ready")
+    def ready() -> dict[str, str]:
+        try:
+            with store.engine.connect() as connection:
+                if (
+                    connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar()
+                    != "0004"
+                ):
+                    raise ValueError
+                if connection.exec_driver_sql("PRAGMA quick_check").scalar() != "ok":
+                    raise ValueError
+            if not application.state.frontend_ready:
+                raise ValueError
+        except Exception:
+            raise HTTPException(503, "Сервис ещё не готов.") from None
+        return {"status": "ready"}
+
+    application.state.frontend_ready = (
+        Path(os.getenv("RATATOUILLE_FRONTEND_DIR", "frontend/dist")) / "index.html"
+    ).is_file()
     return application
 
 

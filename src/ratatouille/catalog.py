@@ -1,6 +1,7 @@
 """Validated recipe cards and atomic owner-scoped library operations."""
 
 from hashlib import sha256
+from importlib.resources import files
 from pathlib import Path
 from typing import Annotated
 
@@ -114,7 +115,12 @@ class StarterLibrary(Contract):
 
 def load_starters(path: Path | None = None) -> StarterLibrary:
     source = path or Path(__file__).resolve().parents[2] / "data/starter_recipes.json"
-    library = StarterLibrary.model_validate_json(source.read_text(encoding="utf-8"))
+    content = (
+        files("ratatouille").joinpath("data/starter_recipes.json").read_text(encoding="utf-8")
+        if path is None and not source.is_file()
+        else source.read_text(encoding="utf-8")
+    )
+    library = StarterLibrary.model_validate_json(content)
     if len({recipe.source_id for recipe in library.recipes}) != 18:
         raise ValidationError("Идентификаторы стартовых рецептов должны быть уникальны.")
     return library

@@ -1,0 +1,59 @@
+name: ratatouille
+x-app: &app
+  image: ratatouille:${RATATOUILLE_VERSION:-local}
+  build: .
+  init: true
+  restart: unless-stopped
+  environment: &environment
+    BOT_TOKEN_FILE: /run/secrets/bot_token
+    RATATOUILLE_APP_URL: ${RATATOUILLE_APP_URL:?Set HTTPS app URL}
+    RATATOUILLE_OWNER_TELEGRAM_ID: ${RATATOUILLE_OWNER_TELEGRAM_ID:?Set owner ID}
+    RATATOUILLE_DB_PATH: /data/ratatouille.sqlite3
+  secrets:
+    - bot_token
+  volumes:
+    - data:/data
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+services:
+  web:
+    <<: *app
+    ports:
+      - 127.0.0.1:8000:8000
+  bot:
+    <<: *app
+    command: [python, -m, ratatouille.bot]
+    healthcheck:
+      disable: true
+  migrate:
+    <<: *app
+    profiles: [admin]
+    restart: "no"
+    command: [python, -m, ratatouille.database]
+    healthcheck:
+      disable: true
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      APP_HOST: ${RATATOUILLE_APP_HOST:?Set domain hostname}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+secrets:
+  bot_token:
+    file: ${RATATOUILLE_TOKEN_FILE:-./deploy/.secrets/bot-token}
+volumes:
+  data:
+    name: ratatouille_data
+  caddy_data:
+  caddy_config:

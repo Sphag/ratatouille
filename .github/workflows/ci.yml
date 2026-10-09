@@ -1,0 +1,41 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: bash tools/dev/setup.sh
+      - name: Check application
+        run: bash tools/dev/check.sh
+      - name: Verify publication manifest
+        run: python3 tools/publication/prepare.py
+  container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Build without workspace secrets
+        run: docker build -t ratatouille:ci .
+      - name: Check migration, readiness, restart and backup
+        run: bash tools/deploy/container-check.sh ratatouille:ci
+      - name: Validate Compose template
+        env:
+          RATATOUILLE_APP_URL: https://app.example.invalid
+          RATATOUILLE_APP_HOST: app.example.invalid
+          RATATOUILLE_OWNER_TELEGRAM_ID: '101'
+        run: docker compose config --quiet
