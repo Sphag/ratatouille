@@ -35,6 +35,23 @@ Release запускается только вручную workflow_dispatch и�
 
 Откат image допустим при совместимой схеме: остановить web/bot, сохранить текущую БД, экспортировать прежний проверенный RATATOUILLE_VERSION и выполнить `up -d --no-build`. При несовместимой схеме на остановленных сервисах восстановить предмиграционную копию в отдельный новый том; изменения после копии будут потеряны. Downgrade и удаление рабочего тома без отдельного решения запрещены. Проверить readiness, цели, планы, отметки, расписание и настоящий бот.
 
+Пример переключения на новый том (подставить прежний SHA, выбранную копию и уникальное имя):
+
+```bash
+export RATATOUILLE_VERSION=PREVIOUS_VERIFIED_SHA
+export RATATOUILLE_DATA_VOLUME=ratatouille_restore_YYYYMMDD
+docker compose --env-file deploy/.env stop web bot
+docker volume create "$RATATOUILLE_DATA_VOLUME"
+docker run --rm --user 0:0 --entrypoint python \
+  -v ratatouille_data:/old:ro -v "$RATATOUILLE_DATA_VOLUME:/data" \
+  -e BACKUP_NAME=CHOSEN_BACKUP.sqlite3 "ratatouille:$RATATOUILLE_VERSION" \
+  -c "import os; from pathlib import Path; from ratatouille.backup import backup; backup(Path('/old/backups')/os.environ['BACKUP_NAME'],Path('/data/ratatouille.sqlite3')); os.chown('/data',10001,10001); os.chown('/data/ratatouille.sqlite3',10001,10001)"
+docker compose --env-file deploy/.env up -d --no-build --force-recreate web bot caddy
+curl --fail http://127.0.0.1:8000/api/ready
+```
+
+Исходный том в примере монтируется только для чтения и сохраняется. Если текущий том имеет другое имя, заменить `ratatouille_data` в команде. После успешной проверки записать выбранные RATATOUILLE_VERSION/DATA_VOLUME в `deploy/.env`, чтобы следующий запуск сохранил переключение. Новый том должен быть пустым; команда не перезаписывает существующую БД.
+
 ## Проверка
 
 221 тест и проверки проекта, YAML/bаsh-синтаксис прошли. Проверены копирование/восстановление, запрет перезаписи, файловый секрет, readiness, повторный выпуск и восстановление сервисов при отказе копии. Установленный wheel читает 18 карточек и мигрирует из заданного корня. Локального Docker daemon нет; build/smoke выполняются в CI PR, результат фиксируется после запуска.

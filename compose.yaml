@@ -54,6 +54,6 @@ secrets:
     file: ${RATATOUILLE_TOKEN_FILE:-./deploy/.secrets/bot-token}
 volumes:
   data:
-    name: ratatouille_data
+    name: ${RATATOUILLE_DATA_VOLUME:-ratatouille_data}
   caddy_data:
   caddy_config:
