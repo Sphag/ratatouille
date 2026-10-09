@@ -10,14 +10,17 @@ from fastapi import FastAPI
 from ratatouille.app import create_app
 from ratatouille.catalog import Catalog, StarterLibrary, load_starters
 from ratatouille.database import database_path, make_engine, migrate
+from ratatouille.menu_api import install_menu_api
+from ratatouille.menus import Menus
 from ratatouille.recipe_api import install_recipe_api
 from ratatouille.storage import Store
 
 
 def local_app(store: Store, owner: str, library: StarterLibrary | None = None) -> FastAPI:
     store.get_goals(owner)  # Validate the configured owner, never trust a client user_id.
-    application = create_app(recipes_enabled=True)
+    application = create_app(recipes_enabled=True, menus_enabled=True)
     install_recipe_api(application, Catalog(store), owner, library or load_starters())
+    install_menu_api(application, Menus(store), owner)
     return application
 
 

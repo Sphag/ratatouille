@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import icon from '../../assets/icon.png';
 import { RecipeForm } from './RecipeForm';
+import { MenuPlanner } from './MenuPlanner';
 import {
   ApiError,
   request,
@@ -68,11 +69,14 @@ export function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+  const [workspace, setWorkspace] = useState<'recipes' | 'menus'>('recipes');
+  const [menusEnabled, setMenusEnabled] = useState(false);
   useEffect(() => {
     let active = true;
-    void request<{ recipes: boolean }>('capabilities')
+    void request<{ recipes: boolean; menus: boolean }>('capabilities')
       .then(async (capabilities) => {
         if (!active) return;
+        setMenusEnabled(capabilities.menus);
         if (!capabilities.recipes) {
           setUnavailable(true);
           return;
@@ -185,7 +189,32 @@ export function App() {
           <span>Готовим неделю заранее</span>
         </div>
       </header>
-      {!data ? (
+      {data && menusEnabled && (
+        <>
+          <nav className="tabs" aria-label="Разделы приложения">
+            <button
+              className={workspace === 'recipes' ? 'tab active' : 'tab'}
+              aria-current={workspace === 'recipes' ? 'page' : undefined}
+              disabled={busy || !!editor}
+              onClick={() => setWorkspace('recipes')}
+            >
+              Библиотека
+            </button>
+            <button
+              className={workspace === 'menus' ? 'tab active' : 'tab'}
+              aria-current={workspace === 'menus' ? 'page' : undefined}
+              disabled={busy || !!editor}
+              onClick={() => setWorkspace('menus')}
+            >
+              Меню
+            </button>
+          </nav>
+          <div hidden={workspace !== 'menus'}>
+            <MenuPlanner active={workspace === 'menus'} />
+          </div>
+        </>
+      )}
+      {workspace === 'menus' ? null : !data ? (
         <section aria-live="polite">
           <h1>Библиотека рецептов</h1>
           {error ? (

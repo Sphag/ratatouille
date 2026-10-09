@@ -10,7 +10,7 @@ from ratatouille.app import create_app
 def test_health_does_not_need_a_frontend_build_or_bot_token(tmp_path: Path) -> None:
     with TestClient(create_app(tmp_path / "missing")) as client:
         response = client.get("/api/health")
-        assert client.get("/api/capabilities").json() == {"recipes": False}
+        assert client.get("/api/capabilities").json() == {"recipes": False, "menus": False}
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
